@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { ethers } from 'ethers';
 import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
-import './Components/SelectCharacter';
+import SelectCharacter from './Components/SelectCharacter';
+import { CONTRACT_ADDRESS, transformCharacterData } from './constants';
+import myEpicGame from './utils/MyEpicGame.json';
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
@@ -15,7 +18,7 @@ const App = () => {
   const [characterNFT, setCharacterNFT] = useState(null);
 
   // Actions
-  const CheckIfWalletIsConnected = async () => {
+  const checkIfWalletIsConnected = async () => {
     // Do we have access to window.ethereum?
     try {
       const { ethereum } = window;
@@ -37,6 +40,35 @@ const App = () => {
         }
       }
     } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const connectWalletAction = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        alert("Get MetaMask!");
+        return;
+      }
+      //Request access to account
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      console.log("Connected", accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const checkNetwork = async () => {
+    try {
+      if (window.ethereum.networkVersion !== '5') {
+        alert("Please connect to Goerli!")
+      }
+    } catch(error) {
       console.log(error);
     }
   };
@@ -63,29 +95,40 @@ const App = () => {
     }
   };
 
-  const connectWalletAction = async () => {
-    try {
-      const { ethereum } = window;
-
-      if (!ethereum) {
-        alert("Get MetaMask!");
-        return;
-      }
-      //Request access to account
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      console.log("Connected", accounts[0]);
-      setCurrentAccount(accounts[0]);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   //Run the function when page loads
   useEffect(() => {
-    CheckIfWalletIsConnected();
+    checkIfWalletIsConnected();
+    checkNetwork();
   }, []);
+
+  useEffect(() => {
+    //This function will interact with smart contract
+    const fetchNFTMetadata = async () => {
+      console.log("Checking for Character NFT on address:", currentAccount);
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const gameContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        myEpicGame.abi,
+        signer
+      );
+
+      const txn = await gameContract.checkIfUserHasNFT();
+      if (txn.name) {
+        console.log("User has character NFT");
+        setCharacterNFT(transformCharacterData(txn));
+      } else {
+        console.log("No character NFT found");
+      }
+    };
+
+    // Only run this if we have a connected wallet
+    if (currentAccount) {
+      console.log("CurrentAccount:", currentAccount);
+      fetchNFTMetadata();
+    }
+  }, [currentAccount]);
 
   return (
     <div className="App">
