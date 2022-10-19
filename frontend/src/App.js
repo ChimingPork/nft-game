@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
+import './Components/SelectCharacter';
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
@@ -9,6 +10,9 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const App = () => {
   //State variable to store user public wallet
   const [currentAccount, setCurrentAccount] = useState(null);
+
+  //State Variable to store characterNFT
+  const [characterNFT, setCharacterNFT] = useState(null);
 
   // Actions
   const CheckIfWalletIsConnected = async () => {
@@ -37,12 +41,34 @@ const App = () => {
     }
   };
 
+  const renderContent = () => {
+    // Scenario 1
+    if (!currentAccount) {
+      return (
+        <div className="connect-wallet-container">
+          <img
+              src="https://media.giphy.com/media/3P0oEX5oTmrkY/giphy.gif"
+              alt="LoTR GIF"
+          />
+          <button
+          className="cta-button connect-wallet-button"
+          onClick={connectWalletAction}
+          >
+            Connect Wallet To Get Started
+          </button>
+        </div>
+      );
+    } else if (currentAccount && !characterNFT) {
+      return <SelectCharacter setCharacterNFT={setCharacterNFT} />;
+    }
+  };
+
   const connectWalletAction = async () => {
     try {
       const { ethereum } = window;
 
       if (!ethereum) {
-        alert("Get MetaMast!");
+        alert("Get MetaMask!");
         return;
       }
       //Request access to account
@@ -67,18 +93,7 @@ const App = () => {
         <div className="header-container">
           <p className="header gradient-text">⚔️ Metaverse Slayer ⚔️</p>
           <p className="sub-text">Team up to protect the Metaverse!</p>
-          <div className="connect-wallet-container">
-            <img
-              src="https://media.giphy.com/media/3P0oEX5oTmrkY/giphy.gif"
-              alt="LoTR GIF"
-            />
-            <button
-            className="cta-button connect-wallet-button"
-            onClick={connectWalletAction}
-            >
-              Connect Wallet To Get Started
-            </button>
-          </div>
+          {renderContent()}
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
