@@ -22,18 +22,13 @@ const main = async () => {
     txn = await gameContract.mintCharacterNFT(0);
     await txn.wait();
 
-    //Get the value of the NFT's URI
-    // let returnedTokenUri = await gameContract.tokenURI(1);
-    // console.log("Token URI:", returnedTokenUri);
-
-    txn = await gameContract.attackBoss();
-    await txn.wait();
-
-    txn = await gameContract.attackBoss();
-    await txn.wait();
-    
-    txn = await gameContract.attackBoss();
-    await txn.wait();
+    // Dynamic Gas Limit to fix transaction failed, Callback_Error with extra attack logic? 
+        // const startEstimate = await gameContract.estimateGas.attackBoss();
+        // txn = await gameContract.attackBoss({
+        //     gasLimit: startEstimate,
+        // });
+        // await txn.wait();
+        // console.log("attack 1");
 };
 
 const runMain = async () => {
