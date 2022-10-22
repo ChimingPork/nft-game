@@ -127,7 +127,7 @@ constructor(
         }
     }
 
-    function getAllDefaultcharacters() public view returns (CharacterAttributes[] memory) {
+    function getAllDefaultCharacters() public view returns (CharacterAttributes[] memory) {
         return defaultCharacters;
     }
 
