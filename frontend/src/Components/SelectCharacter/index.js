@@ -43,12 +43,34 @@ const SelectCharacter = ({ setCharacterNFT }) => {
         } catch (error) {
             console.log("Something went wrong fetching characters", error)
         }
-      };
-      //If gameContract is ready get characters!
-      if (gameContract) {
-        getCharacters();
-      }
-    }, [gameContract]);
+    };
+    //Callback that will fire when mint event is received
+    const onCharacterMint = async (sender, tokenId, characterIndex) => {
+        console.log(
+            `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
+        );
+        
+        alert(`Your NFT is all done -- see it here: https://goerli.pixxiti.com/nfts/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
+
+        //If gameContract is ready get characters!
+        if (gameContract) {
+            const characterNFT = await gameContract.checkIfUserHasNFT();
+            console.log("CharacterNFT: ", characterNFT);
+            setCharacterNFT(transformCharacterData(characterNFT));
+        }
+    };
+
+        if (gameContract) {
+            getCharacters();
+            gameContract.on('CharacterNFTMinted', onCharacterMint);
+        }
+
+        return () => {
+            if (gameContract) {
+                gameContract.off("CharacterNFTMinted", onCharacterMint);
+            }
+        };
+    }, [gameContract, setCharacterNFT]);
 
     const renderCharacters = () => (
         characters.map((character, index) => 
@@ -60,10 +82,23 @@ const SelectCharacter = ({ setCharacterNFT }) => {
             <button 
             type="button"
             className="character-mint-button"
-           // onClick={()=> mintCharacterNFTAction(index)}
+            onClick={()=> mintCharacterNFTAction(index)}
             >{`Mint ${character.name}`}</button>
         </div>
     ));
+
+    const mintCharacterNFTAction = async (characterId) => {
+        try {
+            if (gameContract) {
+                console.log("Minting character in progress...");
+                const mintTxn = await gameContract.mintCharacterNFT(characterId);
+                await mintTxn.wait();
+                console.log("mintTxn:", mintTxn);
+            }
+        } catch (error) {
+            console.warn("MintCharacterAction error:", error)
+        }
+    };
 
     return (
         <div className="select-character-container">

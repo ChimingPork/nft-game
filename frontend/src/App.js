@@ -134,7 +134,7 @@ const App = () => {
     <div className="App">
       <div className="container">
         <div className="header-container">
-          <p className="header gradient-text">⚔️ Metaverse Slayer ⚔️</p>
+          <p className="header gradient-text">⚔️ Metaverse Dragon Slayer ⚔️</p>
           <p className="sub-text">Team up to protect the Metaverse!</p>
           {renderContent()}
         </div>
