@@ -139,7 +139,6 @@ constructor(
         // Get the state of the player NFT
         uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
         CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
-        uint256 attackModifier = randMod(10);
         
         console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
         console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
@@ -170,24 +169,19 @@ constructor(
         // Allow the player to attack the boss
         if (bigBoss.hp < player.attackDamage) {
         bigBoss.hp = 0;
-        } else if (bigBoss.defense < attackModifier) { 
+        } else { 
             bigBoss.hp = bigBoss.hp - player.attackDamage;
-        } else {
-            console.log("The Dragon blocked the attack!");
-        } 
+        }
 
         // Allow boss to attack player
         if (player.hp < bigBoss.attackDamage) {
             player.hp = 0;
             console.log("You have died!");
-        } else if (player.defense < attackModifier) { 
-            player.hp = player.hp - bigBoss.attackDamage;
         } else {
-            console.log("You blocked the Dragon's attack!");
-            }
+            player.hp = player.hp - bigBoss.attackDamage;
+        }
         
         emit AttackComplete(msg.sender, bigBoss.hp, player.hp);
-
         }
 
     //Users use this function to get NFT based on the characterId they send in
