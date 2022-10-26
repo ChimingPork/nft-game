@@ -11,6 +11,7 @@ const Arena = ({ characterNFT, setCharacterNFT, currentAccount }) => {
     const [gameContract, setGameContract] = useState(null);
     const [boss, setBoss] = useState(null);
     const [attackState, setAttackState] = useState("");
+    const [showToast, setShowToast] = useState(false);
 
 
     //useEffects
@@ -87,6 +88,11 @@ const Arena = ({ characterNFT, setCharacterNFT, currentAccount }) => {
                 await attackTxn.wait();
                 console.log("attackTxn:", attackTxn);
                 setAttackState("hit");
+
+                setShowToast(true);
+                setTimeout(() => {
+                    setShowToast(false);
+                }, 5000)
             }
         } catch (error) {
             console.error("Error attacking boss:", error);
@@ -98,7 +104,13 @@ const Arena = ({ characterNFT, setCharacterNFT, currentAccount }) => {
 
     return (
         <div className="arena-container">
-        {boss && (
+            {boss && characterNFT && (
+                <div id="toast" className={showToast ? 'show' : ''}>
+                    <div id="desc">{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
+                </div>
+            )}
+
+            {boss && (
             <div className="boss-container">
             <div className={`boss-content ${attackState}`}>
                 <h2>🔥 {boss.name} 🔥</h2>
