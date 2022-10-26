@@ -3,9 +3,10 @@ import { ethers } from 'ethers';
 import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants';
 import myEpicGame from '../../utils/MyEpicGame.json';
 import './Arena.css';
+import LoadingIndicator from '../../Components/LoadingIndicator';
 
 //Pass in characterNFT metadata to show cards in UI
-const Arena = ({ characterNFT, setCharacterNFT }) => {
+const Arena = ({ characterNFT, setCharacterNFT, currentAccount }) => {
     // State
     const [gameContract, setGameContract] = useState(null);
     const [boss, setBoss] = useState(null);
@@ -38,20 +39,31 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
             setBoss(transformCharacterData(bossTxn));
         };
 
-        const onAttackComplete = (newBossHp, newPlayerHp) => {
+        const onAttackComplete = (from, newBossHp, newPlayerHp) => {
             const bossHp = newBossHp.toNumber();
             const playerHp = newPlayerHp.toNumber();
+            const sender = from.toString();
 
             console.log(`AttackComplete: Boss HP: ${bossHp} Player Hp: ${playerHp}`);
+
+            if (currentAccount === sender.toLowerCase()) {
 
                 setBoss((prevState) => {
                     return { ...prevState, hp: bossHp };
                 });
-
                 setCharacterNFT((prevState) => {
                     return { ...prevState, hp: playerHp };
                 });
-            };
+              }
+              /*
+              * If player isn't ours, update boss Hp only
+              */
+              else {
+                setBoss((prevState) => {
+                    return { ...prevState, hp: bossHp };
+                });
+            }
+        };
 
         if (gameContract) {
             fetchBoss();
@@ -63,7 +75,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                 gameContract.off("AttackComplete", onAttackComplete);
             }
         };
-    }, [gameContract]);
+    }, [gameContract, currentAccount, setCharacterNFT]);
 
     //Actions
     const runAttackAction = async () => {
@@ -103,6 +115,12 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                         {`💥 Attack ${boss.name}`}
                     </button>
                 </div>
+                {attackState === "attacking" && (
+                    <div className="loading-indicator">
+                        <LoadingIndicator />
+                        <p>Attacking ⚔️</p>
+                    </div>
+                )}
             </div>
         )}
         

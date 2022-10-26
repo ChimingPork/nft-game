@@ -6,17 +6,17 @@ import SelectCharacter from './Components/SelectCharacter';
 import { CONTRACT_ADDRESS, transformCharacterData } from './constants';
 import myEpicGame from './utils/MyEpicGame.json';
 import Arena from './Components/Arena';
+import LoadingIndicator from './Components/LoadingIndicator';
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
 const App = () => {
-  //State variable to store user public wallet
+  //State
   const [currentAccount, setCurrentAccount] = useState(null);
-
-  //State Variable to store characterNFT
   const [characterNFT, setCharacterNFT] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Actions
   const checkIfWalletIsConnected = async () => {
@@ -26,6 +26,7 @@ const App = () => {
 
       if (!ethereum) {
         console.log("Make sure you have MetaMask!");
+        setIsLoading(false);
         return;
       } else {
         console.log("We have the ethereum object", ethereum);
@@ -43,6 +44,7 @@ const App = () => {
     } catch (error) {
       console.log(error);
     }
+    setIsLoading(false);
   };
 
   const connectWalletAction = async () => {
@@ -75,6 +77,10 @@ const App = () => {
   };
 
   const renderContent = () => {
+
+    if (isLoading) {
+      return <LoadingIndicator />
+    }
     // Scenario 1
     if (!currentAccount) {
       return (
@@ -100,6 +106,8 @@ const App = () => {
 
   //Run the function when page loads
   useEffect(() => {
+    //Set is loading anytime our component mounts
+    setIsLoading(true);
     checkIfWalletIsConnected();
     checkNetwork();
   }, []);
@@ -124,6 +132,8 @@ const App = () => {
       } else {
         console.log("No character NFT found");
       }
+      //All done with eseEffect/Fetching so return state to false
+      setIsLoading(false);
     };
 
     // Only run this if we have a connected wallet
