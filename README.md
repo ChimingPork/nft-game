@@ -6,8 +6,8 @@ I'm looking forward to expanding the UI and mechanics of this game to test my un
 ## Running the React App
 You can run the app locally by installing all the dependencies using
 
-`cd frontend
-npm install
+`cd frontend\
+npm install\
 npm run start`
 
 # In Progress
